@@ -11,9 +11,9 @@
     <!-- Vue -->
     <script src="https://cdn.jsdelivr.net/vue/latest/vue.js"></script>
     <!-- Firebase -->
-    <script src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.0.3/firebase.js"></script>
     <!-- VueFire -->
-    <script src="https://cdn.jsdelivr.net/vuefire/1.0.0/vuefire.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/vuefire/1.1.0/vuefire.min.js"></script>
   </head>
   ```
 
@@ -26,7 +26,16 @@
   ``` js
   var Vue = require('vue')
   var VueFire = require('vuefire')
-  var Firebase = require('firebase')
+  var firebase = require('firebase')
+
+  // This configuration is available in https://console.firebase.google.com
+  var config = {
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    storageBucket: ''
+  }
+  firebase.initializeApp(config)
 
   // explicit installation required in module environments
   Vue.use(VueFire)
@@ -39,12 +48,12 @@ var vm = new Vue({
   el: '#demo',
   firebase: {
     // simple syntax, bind as an array by default
-    anArray: new Firebase('url/to/my/collection'),
+    anArray: firebase.database().ref('url/to/my/collection'),
     // can also bind to a query
-    // anArray: new Firebase('url/to/my/collection').limitToLast(25)
+    // anArray: firebase.database().ref('url/to/my/collection').limitToLast(25)
     // full syntax
     anObject: {
-      source: new Firebase('url/to/my/object'),
+      source: firebase.database().ref('url/to/my/object'),
       // optionally bind as an object
       asObject: true,
       // optionally provide the cancelCallback

@@ -1,17 +1,24 @@
 var Vue = require('vue')
-var Firebase = require('firebase')
+var firebase = require('firebase')
 var VueFire = require('../src/vuefire')
 var helpers = require('./helpers')
 
 Vue.use(VueFire)
 
-var demoFirebaseUrl = 'https://' + helpers.generateRandomString() + '.firebaseio-demo.com'
+// Initialize Firebase
+var config = {
+  apiKey: 'AIzaSyBekGvFucvEYEqsrSeLeJd9NPN26uYFqiE',
+  authDomain: 'vuefire-1d0e4.firebaseapp.com',
+  databaseURL: 'https://vuefire-1d0e4.firebaseio.com',
+  storageBucket: ''
+}
+firebase.initializeApp(config)
 
 describe('VueFire', function () {
   var firebaseRef
 
   beforeEach(function (done) {
-    firebaseRef = new Firebase(demoFirebaseUrl)
+    firebaseRef = firebase.database().ref('tests')
     firebaseRef.remove(function (error) {
       if (error) {
         done(error)
@@ -595,7 +602,7 @@ describe('VueFire', function () {
     })
 
     it('sets the key as null when bound to the root of the database', function (done) {
-      var rootRef = firebaseRef.root()
+      var rootRef = firebaseRef.root
       var vm = new Vue({
         firebase: {
           items: {

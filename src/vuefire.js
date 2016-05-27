@@ -21,7 +21,7 @@ function createRecord (snapshot) {
   var res = isObject(value)
     ? value
     : { '.value': value }
-  res['.key'] = snapshot.key()
+  res['.key'] = getKey(snapshot)
   return res
 }
 
@@ -40,6 +40,40 @@ function indexForKey (array, key) {
   }
   /* istanbul ignore next */
   return -1
+}
+
+/**
+ * Get the key of a Firebase snapshot across SDK versions
+ *
+ * @param {Object} snapshot A Firebase Snapshot
+ * @return {String} key The Firebase snapshot's key
+ */
+function getKey (snapshot) {
+  var key
+  if (typeof snapshot.key === 'function') {
+    key = snapshot.key()
+  } else if (typeof snapshot.key === 'string' || typeof snapshot.key === 'object') {
+    key = snapshot.key
+  } else {
+    key = snapshot.name()
+  }
+  return key
+}
+
+/**
+ * Get the ref of a Firebase snapshot or reference across SDK versions
+ *
+ * @param {Object} snapshotOrRef A Firebase Snapshot or reference.
+ * @return {Object} ref The object's reference.
+ */
+function getRef (snapshotOrRef) {
+  var ref
+  if (typeof snapshotOrRef.ref === 'function') {
+    ref = snapshotOrRef.ref()
+  } else {
+    ref = snapshotOrRef.ref
+  }
+  return ref
 }
 
 /**
@@ -64,7 +98,7 @@ function bind (vm, key, source) {
   // get the original ref for possible queries
   var ref = source
   if (typeof source.ref === 'function') {
-    ref = source.ref()
+    ref = getRef(source)
   }
   vm.$firebaseRefs[key] = ref
   vm._firebaseSources[key] = source
@@ -94,17 +128,17 @@ function bindAsArray (vm, key, source, cancelCallback) {
   }, cancelCallback)
 
   var onRemove = source.on('child_removed', function (snapshot) {
-    var index = indexForKey(array, snapshot.key())
+    var index = indexForKey(array, getKey(snapshot))
     array.splice(index, 1)
   }, cancelCallback)
 
   var onChange = source.on('child_changed', function (snapshot) {
-    var index = indexForKey(array, snapshot.key())
+    var index = indexForKey(array, getKey(snapshot))
     array.splice(index, 1, createRecord(snapshot))
   }, cancelCallback)
 
   var onMove = source.on('child_moved', function (snapshot, prevKey) {
-    var index = indexForKey(array, snapshot.key())
+    var index = indexForKey(array, getKey(snapshot))
     var record = array.splice(index, 1)[0]
     var newIndex = prevKey ? indexForKey(array, prevKey) + 1 : 0
     array.splice(newIndex, 0, record)
